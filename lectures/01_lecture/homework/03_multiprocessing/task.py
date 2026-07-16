@@ -1,17 +1,9 @@
 """
 Домашнее задание 3: Multiprocessing ⚡
-
-У вас есть числа, для каждого нужно вычислить сложную функцию (CPU-bound).
-Через потоки не ускорить — GIL мешает. Нужно распараллелить через
-multiprocessing.Pool.
-
-Задания:
-    3.1 — Распараллелить вычисление через Pool
-    3.2 — Сравнить производительность threading vs multiprocessing
-
-📖 См. лекцию 1, раздел 4 (Multiprocessing) и пример:
-   lectures/01_lecture/examples/03_multiprocessing/02_cpu_bound.py
 """
+
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Pool
 
 
 # ═══════════════════════════════════════════════════════════
@@ -50,23 +42,17 @@ def heavy_compute(x: int) -> int:
 
 
 def compute_sequential(numbers: list[int]) -> list[int]:
-    """Вычислить heavy_compute для каждого числа ПОСЛЕДОВАТЕЛЬНО.
-
-    Просто для сравнения с параллельной версией.
-    """
-    # TODO: реализуйте
-    raise NotImplementedError
+    """Вычислить heavy_compute для каждого числа ПОСЛЕДОВАТЕЛЬНО."""
+    return [heavy_compute(n) for n in numbers]
 
 
 def compute_parallel_pool(numbers: list[int], processes: int = 4) -> list[int]:
-    """Вычислить heavy_compute через multiprocessing.Pool.
-
-    Требования:
-        - Использовать Pool(processes) как context manager
-        - Результаты в порядке numbers
-    """
-    # TODO: реализуйте
-    raise NotImplementedError
+    """Вычислить heavy_compute через multiprocessing.Pool."""
+    if not numbers:
+        return []
+    with Pool(processes) as pool:
+        results = pool.map(heavy_compute, numbers)
+    return results
 
 
 # ═══════════════════════════════════════════════════════════
@@ -75,9 +61,7 @@ def compute_parallel_pool(numbers: list[int], processes: int = 4) -> list[int]:
 
 
 def compute_with_threads(numbers: list[int], workers: int = 4) -> list[int]:
-    """Вычислить heavy_compute через ThreadPoolExecutor.
-
-    Должно работать МЕДЛЕННЕЕ, чем Pool, из-за GIL.
-    """
-    # TODO: реализуйте
-    raise NotImplementedError
+    """Вычислить heavy_compute через ThreadPoolExecutor."""
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        results = list(executor.map(heavy_compute, numbers))
+    return results
